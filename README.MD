@@ -14,6 +14,30 @@ bf.contains("test")
 bf.contains(keys) //只要包含集合中的一个元素即可
 bf.containsAll() //需要包含集合中的所有的元素
 ```
+## 号称是JAVA实现的最快的Bloom Filter
+* 官网是 https://alexandrnikitin.github.io/blog/bloom-filter-for-scala/ ,在自己的官网中，他分析了Google的Guava、Twitter的Algebird、ScalaNLP的Breeze有多么的suck
+* 其github网址为https://github.com/alexandrnikitin/bloom-filter-scala
+* 可以使用maven引入其依赖https://mvnrepository.com/artifact/com.github.alexandrnikitin/bloom-filter_2.11 ，最新的版本为
+```xml
+<!-- https://mvnrepository.com/artifact/com.github.alexandrnikitin/bloom-filter -->
+<dependency>
+    <groupId>com.github.alexandrnikitin</groupId>
+    <artifactId>bloom-filter_2.11</artifactId>
+    <version>0.10.1</version>
+</dependency>
+```
+* 用法
+```java
+import bloomfilter.mutable.BloomFilter
+
+val expectedElements = 1000
+val falsePositiveRate = 0.1
+val bf = BloomFilter[String](expectedElements, falsePositiveRate)
+bf.add("some string")
+bf.mightContain("some string")
+bf.dispose()
+```
+
 
 ## 密码学原语
 CryptoPrimitives.java
@@ -27,7 +51,7 @@ CryptoPrimitives.java
 	<version>1.54</version>
 </dependency>
 ```
-
+### 签名函数
 ```java
  /**
      * CMAC-AES 算法,CMAC-AES算法是一种消息认证函数
@@ -73,6 +97,7 @@ CryptoPrimitives.java
      */
     public static byte[] randomBytes(int sizeOfSalt)
 ```
+### 加解密函数
 ```java
     /**
      * CTR模式下的AES加密算法
@@ -171,4 +196,24 @@ CryptoPrimitives.java
 	<version>2.6</version>
 </dependency>
 ```
+## 基于双线性对的聚合器
+参考我的另外一个Github项目：https://github.com/zhangzhongjun/BilinearMapAccumulator
+参考论文：Supporting Non-membership Proofs with Bilinear-map Accumulators.pdf
+k是私钥 h=g^k是公钥
+* 算法1：计算一个集合的accumulator
+  ![1](imgs/1.PNG)
+  其中k是私钥，X是要聚合的集合，x是X中的元素
 
+* 算法2：计算某元素的witness
+  ![2](imgs/2.PNG)
+
+* 算法3：判断一个元素是否在集合中
+  需要判断两件事：
+  ![3](imgs/3.PNG)
+  如果不成立，则说明用户提交了一个非法的请求
+  ![4](imgs/4.PNG)
+  如果成立，则y在X中；否则y不在X中
+
+* 算法4：计算一个集合的witness
+  ![5](imgs/5.PNG)
+* 算法5：判断一个集合Y是不是集合X的子集
