@@ -26,8 +26,8 @@ bf.containsAll() //需要包含集合中的所有的元素
     <version>0.10.1</version>
 </dependency>
 ```
-* 用法
-```java
+* 用法 它是在Scala下的一个库，但是在java上也能使用，就是用法有点丑
+```scala
 import bloomfilter.mutable.BloomFilter
 
 val expectedElements = 1000
@@ -37,7 +37,23 @@ bf.add("some string")
 bf.mightContain("some string")
 bf.dispose()
 ```
+```java
+import bloomfilter.CanGenerateHashFrom;
+import bloomfilter.mutable.BloomFilter;
 
+long expectedElements = 10000000;
+double falsePositiveRate = 0.1;
+BloomFilter<byte[]> bf = BloomFilter.apply(
+        expectedElements,
+        falsePositiveRate,
+        CanGenerateHashFrom.CanGenerateHashFromByteArray$.MODULE$);
+
+byte[] element = new byte[100];
+bf.add(element);
+bf.mightContain(element);
+bf.dispose();
+```
+* 效率： 这个库真的很强大，测试了1000 W条数据、0.1的误判率，序列化之后只有区区5.8M。真的很棒！
 
 ## 密码学原语
 CryptoPrimitives.java
@@ -217,3 +233,97 @@ k是私钥 h=g^k是公钥
 * 算法4：计算一个集合的witness
   ![5](imgs/5.PNG)
 * 算法5：判断一个集合Y是不是集合X的子集
+
+## hash函数
+hash函数是抗碰撞的，
+MurMurHash
+
+## ABE 基于属性的加密方式
+参考文献：
+https://github.com/junwei-wang/cpabe 一直在更新的，其官网为https://junwei.co/cpabe/
+https://github.com/mmoraless/DET-ABE/tree/v1.0 一种ABE，名字叫DET-ABE，论文发表在IFIP上：https://link.springer.com/chapter/10.1007%2F978-3-319-24018-3_7
+
+### junwei的实现
+依赖于jpbc库，版本是1.2.1，注意1.2.1与2.0.0的接口有很大的不同之处，不建议修改他的源码。建立使用1.2.1
+1. 修改pom文件
+```xml
+    <dependencies>
+        <dependency>
+            <groupId>it.unisa.dia.gas</groupId>
+            <artifactId>jpbc-api</artifactId>
+            <version>1.2.1</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/jpbc-api-1.2.1.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>it.unisa.dia.gas</groupId>
+            <artifactId>jpbc-plaf</artifactId>
+            <version>1.2.1</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/jpbc-plaf-1.2.1.jar</systemPath>
+        </dependency>
+    <dependencies>
+```
+2. 生成PublicKey和MasterKey，并将他们序列化到文件中
+```java
+String pubfile = MyUtils.getFile("abe_keys","pub_key").getAbsolutePath();
+String mskfile = MyUtils.getFile("abe_keys","master_key").getAbsolutePath();
+Cpabe cpabe = new Cpabe();
+cpabe.setup(pubfile,mskfile);
+```
+3. 根据PublicKey、MasterKey、属性列表 生成 PrivateKey，并将其序列化到文件中
+```java
+String pubfile = MyUtils.getFile("abe_keys","pub_key").getAbsolutePath();
+String mskfile = MyUtils.getFile("abe_keys","master_key").getAbsolutePath();
+String prvfile = MyUtils.getFile("abe_keys","prv_key").getAbsolutePath();
+//属性列表
+String student_attr = "objectClass:inetOrgPerson objectClass:organizationalPerson "
++ "sn:student2 cn:student2 uid:student2 userPassword:student2 "
++ "ou:idp o:computer mail:student2@sdu.edu.cn title:student";
+Cpabe cpabe = new Cpabe();
+cpabe.keygen(pubfile,prvfile,mskfile,student_attr);
+```
+4. 对字符串加解密。这里使用到了加密属性和policy，更多的知识请参考https://junwei.co/cpabe/
+```java
+String pubfile = MyUtils.getFile("abe_keys","pub_key").getAbsolutePath();
+String mskfile = MyUtils.getFile("abe_keys","master_key").getAbsolutePath();
+String prvfile = MyUtils.getFile("abe_keys","prv_key").getAbsolutePath();
+String policy =  "sn:student2 cn:student2 uid:student2 3of3";
+
+Cpabe cpabe = new Cpabe();
+ArrayList<byte[]> res = cpabe.enc(pubfile,policy,"hello world".getBytes("utf-8"));
+System.out.println((cpabe.dec(pubfile,prvfile,res)));
+res = cpabe.enc(pubfile,policy,"java sse implement".getBytes("utf-8"));
+System.out.println((cpabe.dec(pubfile,prvfile,res)));
+```
+5. 对文件加解密
+```java
+String pubfile = MyUtils.getFile("abe_keys","pub_key").getAbsolutePath();
+String mskfile = MyUtils.getFile("abe_keys","master_key").getAbsolutePath();
+String prvfile = MyUtils.getFile("abe_keys","prv_key").getAbsolutePath();
+String policy =  "sn:student2 cn:student2 uid:student2 3of3";
+
+test.enc(pubfile, policy, inputfile, encfile);
+test.dec(pubfile, prvfile, encfile, decfile);
+```
+6. 提高效率
+  每次加密和解密时候都需要从文件中加载PublicKey MasterKey PrivateKey，会造成较大的存储开销，当加密的是一个文件的时候，这是没有问题的；但当加密的是字符串时，频繁地加载太耗时了
+```java
+/* get BswabePub from pubfile */
+byte[] pub_byte = Common.suckFile(pubfile);
+BswabePub pub = SerializeUtils.unserializeBswabePub(pub_byte);
+/* get BswabePrv form prvfile */
+byte[] prv_byte = Common.suckFile(prvfile);
+BswabePrv prv = SerializeUtils.unserializeBswabePrv(pub, prv_byte);
+```
+```java
+//加密
+ArrayList<byte[]> res = cpabe.enc(pub, policy, "hello world".getBytes("utf-8"));
+//解密
+System.out.println((cpabe.dec(pub, prv, res)));
+```
+```bash
+实验结果：
+未提高效率100次加解密 40844 ms
+提高效率100次加解密 33265 ms
+```
