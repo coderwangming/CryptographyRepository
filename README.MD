@@ -1,5 +1,7 @@
 # 密码学仓库
 在为实验室师兄师姐做仿真实验时，我发现有很多的代码段是被重复利用的
+## 常用的时间
+模指数：40 ms
 
 ## 布隆过滤器
 BloomFilter.java
@@ -135,6 +137,52 @@ CryptoPrimitives.java
     //同理，还有CBC模式下的AES加密
     public static byte[] encryptAES_CBC(byte[] keyBytes, byte[] ivBytes, byte[] input)
 ```
+### 一个独立的AES加解密
+在AESCoder.java中，我们实现了AES加解密的算法
+
+### 对加解密函数进行进一步的封装
+固定初始向量，简化调用接口，通常将此函数放在MyUtils中，static类型
+```java
+/**
+ * AES加密时候使用的初始向量
+ */
+private static final byte[] ivBytes = new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+/**
+ * 使用CBC模式下的AES加密算法加密
+ *
+ * @param Ke 密钥 16 byte
+ * @param mingWen 要加密的明文
+ * @return 加密之后得到的密文
+ * @throws IOException 异常
+ * @throws InvalidAlgorithmParameterException 异常
+ * @throws NoSuchAlgorithmException 异常
+ * @throws NoSuchPaddingException 异常
+ * @throws NoSuchProviderException 异常
+ * @throws InvalidKeyException 异常
+ */
+public static byte[] encrypt_AES_CBC(byte[] Ke, String mingWen) throws IOException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException, InvalidKeyException {
+	final byte[] miWen = CryptoPrimitives.encryptAES_CBC(Ke, ivBytes, mingWen.getBytes("utf-8"));
+	return miWen;
+}
+
+/**
+ * 使用CBC模式下的AES加密算法解密
+ * @param Ke 解密密钥
+ * @param miWen 需要解密的密文
+ * @return 解密之后得到的明文
+ * @throws InvalidAlgorithmParameterException 异常
+ * @throws NoSuchAlgorithmException 异常
+ * @throws NoSuchPaddingException 异常
+ * @throws NoSuchProviderException 异常
+ * @throws InvalidKeyException 异常
+ * @throws IOException 异常
+ */
+public static String decrypt_AES_CBC(byte[] Ke,byte[] miWen) throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException, NoSuchProviderException, InvalidKeyException, IOException {
+	byte[] s = CryptoPrimitives.decryptAES_CBC(miWen, Ke);
+	return new String(s,"utf-8");
+}
+```
+
 ## JPBC 
 是Pairing Based Cryptography的Java版本，访问 [JPBC官方网站](http://gas.dia.unisa.it/projects/jpbc/#.WqM_ldeWbIV "Title") 
 
@@ -201,6 +249,12 @@ CryptoPrimitives.java
      */
     final public Element s = pairing.getZr().newRandomElement();
 ```
+踩过的坑：
+1. 没有将params文件夹拷贝到项目中
+2. 在使用元素时候没有使用duplicate()，从而使得原始值发生变化
+### JBPC中元素的大小
+![双线性对中元素的大小](imgs/双线性对中元素的大小.PNG)
+
 ## SerializableElement.java
 一个可以序列化的Element，JPBC中提供的Element是不可以序列化的
 需要引入如下的依赖
@@ -327,3 +381,7 @@ System.out.println((cpabe.dec(pub, prv, res)));
 未提高效率100次加解密 40844 ms
 提高效率100次加解密 33265 ms
 ```
+## Patrick P. C. Lee教授的主页
+http://www.cse.cuhk.edu.hk/~pclee/www/pubs.html
+
+其主页上有他的工作的论文下载，ppt，代码，甚至是在会议上讲论文的视频，我认为这个人很优秀，愿意开源，敢于开源。
