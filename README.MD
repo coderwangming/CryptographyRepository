@@ -4,6 +4,11 @@
 模指数：40 ms
 
 ## 布隆过滤器
+
+参数设置可以参考如下的网址：
+http://pages.cs.wisc.edu/~cao/papers/summary-cache/node8.html
+
+
 BloomFilter.java
 ```java
 List<String> keywords = GenerateBloomFilter.getKeywordsFromFile(inputAbsolutePath);
