@@ -1,5 +1,46 @@
 # 密码学仓库
 在为实验室师兄师姐做仿真实验时，我发现有很多的代码段是被重复利用的
+
+## 伪随机函数
+
+在论文中经常出现伪随机函数，郭师姐提示我使用hash函数即可实现
+
+```java
+    /**
+     * 一个随机函数 {0,1}^lambda X {0,1}^lambda -&gt; {0,1}^lambda
+     *
+     * @param K
+     *         密钥
+     * @param e
+     *         元素
+     *
+     * @return 随机映射的结果，长度为16的byte数组
+     *
+     * @throws UnsupportedEncodingException
+     *         异常
+     */
+    public static byte[] F(final byte[] K, final Element e) throws UnsupportedEncodingException {
+        byte[] res = CryptoPrimitives.generateCmac(K, e.toString());
+        return res;
+    }
+
+    /**
+     * 一个随机函数 {0,1}^lambda X {0,1}^lambda -&gt; Zp*
+     * @param KI 密钥
+     * @param id 文件名
+     *
+     * @return 随机映射的结果，长度为16的byte数组
+     *
+     * @throws Exception 异常
+     */
+    public static Element Fp(final byte[] KI,String id) throws Exception {
+        byte[] res = CryptoPrimitives.generateCmac(KI, id);
+        Element e = pairing.getZr().newElement();
+        e.setFromBytes(res);
+        return e;
+    }
+```
+
 ## 常用的时间
 模指数：40 ms
 
@@ -61,6 +102,45 @@ bf.mightContain(element);
 bf.dispose();
 ```
 * 效率： 这个库真的很强大，测试了1000 W条数据、0.1的误判率，序列化之后只有区区5.8M。真的很棒！
+
+
+## 计数型BloomFilter
+
+https://github.com/Baqend/Orestes-Bloomfilter
+支持计数型BF 和 redis的BF
+
+```xml
+<dependencies>
+   <dependency>
+       <groupId>com.baqend</groupId>
+       <artifactId>bloom-filter</artifactId>
+       <version>1.0.7</version>
+   </dependency>
+</dependencies>
+<repositories>
+   <repository>
+       <snapshots>
+        <enabled>false</enabled>
+       </snapshots>
+       <id>central</id>
+       <name>bintray</name>
+       <url>http://jcenter.bintray.com</url>
+   </repository>
+</repositories>
+```
+
+## Garbled BloomFilter
+
+参考文献： When Private Set Intersection Meets Big Data An Efficient and Scalable Protocol
+
+### 秘密共享
+
+当t=n时，（t,n）秘密共享方案如下：
+![密钥共享](imgs/密钥共享.jpg)
+
+### Garbled BF构造
+![GarbledBF](imgs/GarbledBF.jpg)
+
 
 ## 密码学原语
 CryptoPrimitives.java
