@@ -378,8 +378,15 @@ hash函数是抗碰撞的，
 MurMurHash
 
 ## ABE 基于属性的加密方式
-参考文献：
+> 基于属性的加密，又称模糊的基于身份的加密（Fuzzy Identity-Based Encryption）。
+> 基于属性的加密分为CP-ABE 和 KP-ABE，即基于密文策略的ABE 和 基于密钥策略ABE
+
+### CP-ABE
+
 https://github.com/junwei-wang/cpabe 一直在更新的，其官网为https://junwei.co/cpabe/
+
+### DET-ABE
+
 https://github.com/mmoraless/DET-ABE/tree/v1.0 一种ABE，名字叫DET-ABE，论文发表在IFIP上：https://link.springer.com/chapter/10.1007%2F978-3-319-24018-3_7
 
 ### junwei的实现
