@@ -1,6 +1,15 @@
 # 密码学仓库
 在为实验室师兄师姐做仿真实验时，我发现有很多的代码段是被重复利用的
 
+## MD5签名
+
+```java
+
+
+// 使用base64编码
+String res = CryptographyRepository2.generateMD5_String(msg);
+```
+
 ## PKI
 
 ### 作用
