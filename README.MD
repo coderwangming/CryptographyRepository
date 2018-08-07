@@ -503,3 +503,17 @@ System.out.println((cpabe.dec(pub, prv, res)));
 http://www.cse.cuhk.edu.hk/~pclee/www/pubs.html
 
 其主页上有他的工作的论文下载，ppt，代码，甚至是在会议上讲论文的视频，我认为这个人很优秀，愿意开源，敢于开源。
+
+# PBC库
+
+是一个用c写的双线性对的库，其安装步骤可以参考 [VDB实验](https://github.com/zhangzhongjun/VDB)
+
+其官网为 https://crypto.stanford.edu/pbc/
+
+可以参考官方给的文档《pbc library manual 0.5.14》
+
+# libssl库
+
+其安装步骤可以参考 [VDB实验](https://github.com/zhangzhongjun/VDB)
+
+可以参考官方给的文档《openssl cookbook》
