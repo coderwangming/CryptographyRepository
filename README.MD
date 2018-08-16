@@ -1,6 +1,12 @@
 # 密码学仓库
 在为实验室师兄师姐做仿真实验时，我发现有很多的代码段是被重复利用的
 
+## HackingCipher
+
+HackingCipher是一本密码学读物，作者给出了众多基本加密签名算法的python实现，包括DES、AES、置换加密等，还有一些攻击方式，如频率攻击等。
+
+在文件夹HackingCipher中
+
 ## MD5签名
 
 ```java
