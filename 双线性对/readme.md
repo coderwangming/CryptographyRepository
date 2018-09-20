@@ -103,3 +103,11 @@ final public Element s = pairing.getZr().newRandomElement();
 	<version>2.6</version>
 </dependency>
 ```
+
+# 测试时间
+
+> 参考 TimeTest.java
+
+Zr域中做乘法的时间
+
+G域中做乘法的时间
