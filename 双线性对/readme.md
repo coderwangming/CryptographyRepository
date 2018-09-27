@@ -106,8 +106,15 @@ final public Element s = pairing.getZr().newRandomElement();
 
 # 测试时间
 
-> 参考 TimeTest.java
+> 参考  ./测试时间/乘法运算/TimeTest.java
 
 Zr域中做乘法的时间
 
 G域中做乘法的时间
+
+> 参考 ./测试时间/幂运算+乘法运算/*
+
+c版本：10000 次幂运算和 10000 次乘法运算 耗时 16811.365 ms
+
+
+java版本：10000 次幂运算和 10000 次乘法运算 耗时 116719 ms
