@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 // 如何运行
 // gcc -I./pbc -I./pbc/include -lpbc -lgmp -std=c99 -o main main.c && clear && ./main < ./pbc/param/a.param
+// g++ -I/root/gmp-6.1.2 -lgmp -lntl -lm  -std=c++11 -o main main.cpp PrGlib.cpp RSA.cpp
 //////////////////////////////////////////////////////////////////////
 
 
